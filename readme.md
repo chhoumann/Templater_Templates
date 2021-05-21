@@ -32,6 +32,8 @@ $$
 $$
 ```
 ## Scripts
+You will have to define a folder for your userscripts in Templater. Do this in your Templater settings under "Script files folder location". Remember, the scripts are called like this: `tp.user.QuickAdd(tp, choices);`, where `QuickAdd` is the _case-sensitive_ name of thie file. So, if you change the file name, change it in the markdown template as well.
+
 ### https://github.com/chhoumann/Templater_Templates/tree/master/readwise
 Insert anything from your Readwise account. You will need your Readwise token - which you can get [here](https://readwise.io/access_token).
 It should be able to fetch anything from any time.
