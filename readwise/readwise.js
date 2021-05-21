@@ -1,25 +1,33 @@
 module.exports = start;
 const apiUrl = "https://readwise.io/api/v2/";
+const books = "📚 Books", articles = "📰 Articles", tweets = "🐤 Tweets", supplementals = "💭 Supplementals", podcasts = "🎙 Podcasts", searchAll = "🔍 Search All Highlights (slow!)";
+const categories = {books, articles, tweets, supplementals, podcasts, searchAll};
+
 let token;
 let tp;
 
 async function start(templater, readwiseToken) {
     tp = templater;
     token = readwiseToken;
+    let highlights;
     const category = await categoryPromptHandler();
     if (!category) return;
 
-    let res = await getHighlightsByCategory(category);
-    if (!res) return;
+    if (category === "searchAll") {
+        highlights = await getAllHighlights(); 
+    } else {
+        let res = await getHighlightsByCategory(category);
+        if (!res) return;
 
-    const {results} = res;
-    const item = await tp.system.suggester(item => item.title, results);
-    if (!item) return;
+        const {results} = res;
+        const item = await tp.system.suggester(item => item.title, results);
+        if (!item) return;
 
-    const res2 = await getHighlightsForElement(item);
-    if (!res2) return;
+        const res2 = await getHighlightsForElement(item);
+        if (!res2) return;
 
-    let highlights  = res2.results.reverse();
+        highlights  = res2.results.reverse();
+    }
 
     const textToAppend = await highlightsPromptHandler(highlights);
 
@@ -27,9 +35,6 @@ async function start(templater, readwiseToken) {
 }
 
 async function categoryPromptHandler() {
-    const books = "📚 Books", articles = "📰 Articles", tweets = "🐤 Tweets", supplementals = "💭 Supplementals", podcasts = "🎙 Podcasts";
-    const categories = {books, articles, tweets, supplementals, podcasts};
-
     const choice = await tp.system.suggester(Object.values(categories), Object.keys(categories));
     if (!choice) return null;
 
@@ -91,6 +96,22 @@ async function getHighlightsByCategory(category) {
 
 async function getHighlightsForElement(element) {
     return apiGet(`${apiUrl}highlights`, {book_id: element.id, page_size: 1000});
+}
+
+async function getAllHighlights() {
+    let allHighlights = [];
+    let res, url = `${apiUrl}highlights`;
+
+    do {
+        res = await apiGet(url, {page_size: 1000});
+        if (res.next)
+            url = res.next;
+
+        const {results} = res;
+        allHighlights = [...allHighlights, ...results];
+    } while (!!res.next);
+
+    return allHighlights;
 }
 
 async function apiGet(url, data) {
