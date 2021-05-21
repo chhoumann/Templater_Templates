@@ -1,4 +1,7 @@
 # Christian's Templater Templates
+Found a template your like? Make sure you copy the raw file - not what Github renders. Click this button to see the raw file:
+![image](https://user-images.githubusercontent.com/29108628/119149655-017b3800-ba4e-11eb-978f-7be6435bbf29.png)
+
 
 ## Templates
 ## https://github.com/chhoumann/Templater_Templates/blob/master/code.md
