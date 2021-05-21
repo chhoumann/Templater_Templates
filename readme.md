@@ -42,7 +42,7 @@ Insert anything from your Readwise account. You will need your Readwise token - 
 It should be able to fetch anything from any time.
 
 #### Main menu
-![image](https://user-images.githubusercontent.com/29108628/119145954-7187bf00-ba4a-11eb-8e88-00039dff57b6.png)
+![Obsidian_UfeK41i3zb](https://user-images.githubusercontent.com/29108628/119157789-d3015b00-ba55-11eb-847d-58de6f721948.png)
 #### Books
 ![image](https://user-images.githubusercontent.com/29108628/119146073-8e23f700-ba4a-11eb-984d-044d0e7b6528.png)
 #### Book selected
