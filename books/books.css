@@ -1,0 +1,29 @@
+.dv_cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: auto;
+    grid-gap: 1rem;
+}
+
+.dv_card {
+    padding: 0.5rem;
+    border-radius: 25px;
+}
+
+.dv_gal_img {
+    width: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.dv_gal_textDiv {
+    text-align: center;
+}
+
+.dv_gal_title {
+    font-size: larger;
+}
+
+.dv_gal_author {
+    color: gray;
+}
