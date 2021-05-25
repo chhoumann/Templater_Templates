@@ -61,5 +61,6 @@ You can select the text, start symbol, and template to add.
 ### Start symbol (~)
 ![image](https://user-images.githubusercontent.com/29108628/119146711-31750c00-ba4b-11eb-9531-d737c9b71cd6.png)
 
-### Books (dataview)
+### [Books (dataview)](https://github.com/chhoumann/Templater_Templates/tree/master/books)
 This is a dataview query.
+![image](https://user-images.githubusercontent.com/29108628/119533818-8a63dd80-bd86-11eb-8ee5-1cfa996b37c1.png)
