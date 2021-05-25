@@ -1,7 +1,9 @@
 <%*
 const languages = {
     "C#": "CSharp",
-    "JavaScript": "JavaScript"
+    "JavaScript": "JavaScript",
+    "DataviewJS": "dataviewjs",
+    "Dataview": "dataview"
 }
 lang = await tp.system.suggester(Object.keys(languages), Object.values(languages)) 
 if (lang) {
