@@ -1,5 +1,7 @@
 module.exports = start;
 let tp;
+const defaultFolder = "/";
+const defaultStartSymbol = "";
 
 async function start(templater, choices) {
     if (!templater) return; else tp = templater;
@@ -25,12 +27,21 @@ async function addFromTemplate(choice, name) {
     const templateContent = await getTemplateData(choice.path);
     if (!templateContent) return;
 
-    let modStartSymbol = choice.startSymbol;
-    if (modStartSymbol != null && modStartSymbol != "")
-        modStartSymbol = modStartSymbol + " ";
+    let modStartSymbol = defaultStartSymbol;
+    if (choice.startSymbol && typeof choice.startSymbol === "string" && modStartSymbol != "")
+        modStartSymbol = choice.startSymbol + " ";
 
+    let folder = defaultFolder;
 
-    const created = await app.vault.create(`${modStartSymbol}${name}.md`, templateContent);
+    if (choice.folder && typeof choice.folder === "string") {
+        folder = choice.folder;
+
+        if (!(await this.app.vault.adapter.exists(folder))) {
+            await this.app.vault.createFolder(folder);
+        }
+    }
+
+    const created = await app.vault.create(`${folder}/${modStartSymbol}${name}.md`, templateContent);
     app.workspace.activeLeaf.openFile(created);
 }
 

@@ -51,8 +51,29 @@ It should be able to fetch anything from any time.
 ![image](https://user-images.githubusercontent.com/29108628/119146122-9bd97c80-ba4a-11eb-984c-a8c0dc821a65.png)
 
 ### https://github.com/chhoumann/Templater_Templates/tree/master/quickadd
-Add a new page given a template. Can prepend a 'start symbol', which can be used to denote litterature notes and the likes.
+Add a new page given a template. Can prepend a 'start symbol', which can be used to denote literature notes and the likes.
 You can select the text, start symbol, and template to add.
+
+In the default markdown file (`QuickAdd.md`), there is an array assigned to `choices`. Every element (choice) in this array must have an option name and a path to the template to insert. Choices should be separated by commas.
+
+Choices are in JavaScript object format, which consists of key-value pairs. They should be separated by commas. Like this: `{key1: value1, key2: value2}`.
+
+There are two optional keys: `startSymbol` and `folder`. 
+
+The start symbol is prepended to the name you enter when running the script. For example, if you write "Meditations", and your start symbol is `{`, the file name will be `{ Meditations`.
+
+The folder key represents which folder your item will be created in. If it does not exist, it will be made.
+
+Below is an example object representing one choice in the array.
+
+```js
+{
+  option: "💭 Add a Thought", 
+  startSymbol: "~", 
+  path: "bins/templates/Inputs/Thought.md",
+  folder: "thoughts"
+}
+```
 
 ### Main menu
 ![image](https://user-images.githubusercontent.com/29108628/119146591-0f7b8980-ba4b-11eb-8fac-ab275067434f.png)
