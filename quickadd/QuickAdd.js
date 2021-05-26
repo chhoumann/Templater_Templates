@@ -28,18 +28,35 @@ async function addFromTemplate(choice, name) {
     if (!templateContent) return;
 
     let modStartSymbol = defaultStartSymbol;
-    if (choice.startSymbol && typeof choice.startSymbol === "string" && modStartSymbol != "")
+    if (choice.startSymbol && typeof choice.startSymbol === "string")
         modStartSymbol = choice.startSymbol + " ";
 
-    let folder = defaultFolder;
+    const folder = await getOrCreateFolder(choice);
+    if (!folder) return;
+    
+    const fileName = `${folder}/${modStartSymbol}${name}.md`;
 
+    const created = await app.vault.create(fileName, templateContent);
+    app.workspace.activeLeaf.openFile(created);
+}
+
+async function getTemplateData(templatePath) {
+    const templateFile = await app.vault.getMarkdownFiles().find(f => f.path === templatePath);
+    
+    if (!templateFile) return null;
+    
+    return await app.vault.read(templateFile);
+}
+
+async function getOrCreateFolder(choice) {
+    let folder = defaultFolder;
     if (choice.folder) {
         if (typeof choice.folder === "string"){
             folder = choice.folder;
         }
         else if (choice.folder[Symbol.iterator]) {
             folder = await tp.system.suggester(choice.folder, choice.folder);
-            if (!folder) return;
+            if (!folder) return null;
         }
 
         if (!(await this.app.vault.adapter.exists(folder))) {
@@ -47,14 +64,5 @@ async function addFromTemplate(choice, name) {
         }
     }
 
-    const created = await app.vault.create(`${folder}/${modStartSymbol}${name}.md`, templateContent);
-    app.workspace.activeLeaf.openFile(created);
-}
-
-async function getTemplateData(templatePath) {
-    const templateFile = await app.vault.getMarkdownFiles().find(f => f.path == templatePath);
-    
-    if (!templateFile) return null;
-    
-    return await app.vault.read(templateFile);
+    return folder;
 }
