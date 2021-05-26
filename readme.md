@@ -62,7 +62,7 @@ There are two optional keys: `startSymbol` and `folder`.
 
 The start symbol is prepended to the name you enter when running the script. For example, if you write "Meditations", and your start symbol is `{`, the file name will be `{ Meditations`.
 
-The folder key represents which folder your item will be created in. If it does not exist, it will be made.
+The folder key represents which folder your item will be created in. If it does not exist, it will be made. `folder` can be either a single string, like: `{folder: "folderName"}`, or an array of strings: `{folder: ["projects/one", "projects/two", "projects/three"]}`.
 
 Below is an example object representing one choice in the array.
 

@@ -33,8 +33,14 @@ async function addFromTemplate(choice, name) {
 
     let folder = defaultFolder;
 
-    if (choice.folder && typeof choice.folder === "string") {
-        folder = choice.folder;
+    if (choice.folder) {
+        if (typeof choice.folder === "string"){
+            folder = choice.folder;
+        }
+        else if (choice.folder[Symbol.iterator]) {
+            folder = await tp.system.suggester(choice.folder, choice.folder);
+            if (!folder) return;
+        }
 
         if (!(await this.app.vault.adapter.exists(folder))) {
             await this.app.vault.createFolder(folder);
