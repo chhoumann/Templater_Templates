@@ -45,7 +45,6 @@ There are two main contexts to be aware of. Adding from a template, and quick ca
 | appendLink  | No       | Boolean | If `true`, a link to the file you've captured to is written to your cursor position.                                                                                                                                                                                                          |
 | task        | No       | Boolean | If `true`, the value will be preceded by a `- [ ]`.                                                                                                                                                                                                                                           |
 | insertAfter | No       | String  | The value entered will be added on the line below a line matching the given string.                                                                                                                                                                                                                                                                                              |
-                                                                                   |
 
 
 #### `format` syntax
