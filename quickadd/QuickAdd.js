@@ -21,7 +21,7 @@ async function start(templater, choices) {
     if (choice.captureTo && typeof choice.captureTo === "string") {
         outValue = await doQuickCapture(choice);
     } else {
-        const needName = !(choice.format && NAME_VALUE_REGEX.test(choice.format))
+        const needName = (!choice.format || (choice.format && NAME_VALUE_REGEX.test(choice.format)))
         const name = needName ? await promptForValue(choice) : "";
 
         outValue = await addNewFileFromTemplate(choice, name);
@@ -48,9 +48,8 @@ async function doQuickCapture(choice) {
 
     if (await app.vault.adapter.exists(filePath)) {
         const absFile = app.vault.getAbstractFileByPath(filePath);
-
         let fileContent = await app.vault.cachedRead(absFile);
-
+        
         if (choice.prepend)
             fileContent = `${fileContent}\n${input}`;
         else
@@ -58,7 +57,8 @@ async function doQuickCapture(choice) {
 
         await app.vault.modify(absFile, fileContent);
     } else {
-        await app.vault.create(filePath, input)
+        const created = await createFileWithInput(filePath, input);
+        if (!created) return null;
     }
 
     return filePath;
@@ -81,14 +81,14 @@ async function addNewFileFromTemplate(choice, name) {
     const templateContent = await getTemplateData(choice.path);
     if (!templateContent) return null;
 
-    const folder = await getOrCreateFolder(choice);
+    const folder = await getOrCreateFolderForChoice(choice);
     if (!folder) return null;
 
     let fileName = choice.format ? 
         getFormattedFileName(choice.format, name, folder) :
         getFileName(choice, folder, name);
 
-    const created = await app.vault.create(fileName, templateContent);
+    const created = createFileWithInput(fileName, templateContent);
     app.workspace.activeLeaf.openFile(created);
 
     return fileName;
@@ -102,23 +102,39 @@ async function getTemplateData(templatePath) {
     return await app.vault.read(templateFile);
 }
 
-async function getOrCreateFolder(choice) {
-    let folder = defaultFolder;
-    if (choice.folder) {
-        if (typeof choice.folder === "string"){
-            folder = choice.folder;
-        }
-        else if (choice.folder[Symbol.iterator]) {
-            folder = await tp.system.suggester(choice.folder, choice.folder);
-            if (!folder) return null;
-        }
+async function createFileWithInput(filePath, input) {
+    const dirName = filePath.match(/(.*)[\/\\]/)[1] || "";
 
-        if (!(await this.app.vault.adapter.exists(folder))) {
-            await this.app.vault.createFolder(folder);
-        }
+    if (await app.vault.adapter.exists(dirName)) {
+        return await app.vault.create(filePath, input);
+    } else {
+        await getOrCreateFolder(dirName);
+        return await app.vault.create(filePath, input)
     }
+}
+
+async function getOrCreateFolderForChoice(choice) {
+    let folder = defaultFolder;
+
+    if (choice.folder)
+        folder = await getOrCreateFolder(choice.folder);
 
     return folder;
+}
+
+async function getOrCreateFolder(folder) {
+    let outValue = folder;
+
+    if (folder[Symbol.iterator] && typeof folder !== "string") {
+        outValue = await tp.system.suggester(folder, folder);
+        if (!outValue) return null;
+    }
+
+    if (!(await app.vault.adapter.exists(folder))) {
+        await app.vault.createFolder(folder);
+    }
+
+    return outValue;
 }
 
 function getFileName(choice, folder, name) {
