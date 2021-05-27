@@ -42,7 +42,7 @@ There are two main contexts to be aware of. Adding from a template, and quick ca
 | format     | No       | String  | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one.                                                                                                                                    |
 | prepend    | No       | Boolean | If `true`, value will be added to the bottom of the file. Default is false.                                                                                                                                                                                                                   |
 | appendLink | No       | Boolean | If `true`, a link to the file you've captured to is written to your cursor position.                                                                                                                                                                                                          |
-| Task       | No       | Boolean | If `true`, the value will be preceded by a `- [ ]`.                                                                                                                                                                                                                                           |
+| task       | No       | Boolean | If `true`, the value will be preceded by a `- [ ]`.                                                                                                                                                                                                                                           |
 
 
 #### `format` syntax
