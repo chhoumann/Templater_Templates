@@ -165,6 +165,9 @@ const choices = [
 This quick capture choice lets me quickly add journal entry points to my daily journal.
 It'll be in this format: `- 18:05 Cooked dinner`.
 
+![BR2Rdt4jDn](https://user-images.githubusercontent.com/29108628/119866008-9b465780-bf1c-11eb-8560-009d229ea7b6.gif)
+
+
 #### Main menu
 ![image](https://user-images.githubusercontent.com/29108628/119146591-0f7b8980-ba4b-11eb-8fac-ab275067434f.png)
 #### Add
