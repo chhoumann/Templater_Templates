@@ -20,21 +20,15 @@ async function start(templater, choices) {
     const choice = await tp.system.suggester(choice => choice.option, choices);
     if (!choice) return warn("no choice selected.");
 
-    let outValue;
     if (choice.captureTo && typeof choice.captureTo === "string") {
-        outValue = await doQuickCapture(choice);
+        await doQuickCapture(choice);
     } else {
         const needName = (!choice.format || (choice.format && NAME_VALUE_REGEX.test(choice.format)))
         const name = needName ? await promptForValue(choice) : "";
         if (needName && !name) return warn("no filename provided.");
 
-        outValue = await addNewFileFromTemplate(choice, name);
+        await addNewFileFromTemplate(choice, name);
     }
-
-    if (choice.appendLink && outValue)
-        return `[[${outValue}]]`;
-    else
-        return "";
 }
 
 async function doQuickCapture(choice) {
@@ -67,7 +61,8 @@ async function doQuickCapture(choice) {
         if (!created) throw error("file could not be created.");
     }
 
-    return filePath;
+    if (choice.appendLink)
+        appendToCurrentLine(`[[${filePath}]]`);
 }
 
 async function promptForValue(choice) {
