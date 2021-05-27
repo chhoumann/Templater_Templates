@@ -11,6 +11,7 @@ You will have to define a folder for your userscripts in Templater. Do this in y
 3. Add the `.md` file ot the folder you've set as your "Template folder location".
 4. Add the `.js` file ot the folder you've set as your "Script files folder location".
 
+**IMPORTANT:** If you are inserting a template that has more than text (templater commands, etc), then you need to enable `Trigger Templater on file creation`.
 
 https://user-images.githubusercontent.com/29108628/119812018-fa3da980-bee7-11eb-856a-02cd034055fc.mp4
 
