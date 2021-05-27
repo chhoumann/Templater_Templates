@@ -44,6 +44,8 @@ async function doQuickCapture(choice) {
     let input = await promptForValue(choice);
     if (!input) return warn("no input given.");
 
+    filePath = getFormattedValue(filePath, input);
+
     if (choice.task)
         input = `- [ ] ${input}`;
 
@@ -95,9 +97,21 @@ async function addNewFileFromTemplate(choice, name) {
     const formattedTemplateContent = getFormattedValue(templateContent, templateContent);
 
     const created = await createFileWithInput(fileName, formattedTemplateContent);
-    app.workspace.activeLeaf.openFile(created);
+    if (!created) return error("could not create file.");
+
+    if (choice.appendLink)
+        appendToCurrentLine(`[[${created.path}]]`);
+
+    if (!choice.noOpen)
+        app.workspace.activeLeaf.openFile(created);
 
     return fileName;
+}
+
+function appendToCurrentLine(string) {
+    const editor = app.workspace.activeLeaf.view.editor;
+    const selected = editor.getSelection()
+    editor.replaceSelection(`${selected}${string}`);
 }
 
 async function getTemplateData(templatePath) {
