@@ -88,7 +88,7 @@ async function addNewFileFromTemplate(choice, name) {
         getFormattedFileName(choice.format, name, folder) :
         getFileName(choice, folder, name);
 
-    const created = createFileWithInput(fileName, templateContent);
+    const created = await createFileWithInput(fileName, templateContent);
     app.workspace.activeLeaf.openFile(created);
 
     return fileName;
