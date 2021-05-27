@@ -12,7 +12,7 @@ const LINK_TO_CURRENT_FILE_REGEX = new RegExp(/{{LINKCURRENT}}/);
 const MARKDOWN_FILE_EXTENSION_REGEX = new RegExp(/\.md$/);
 const endsWithMd = (str) => MARKDOWN_FILE_EXTENSION_REGEX.test(str);
 
-const error = (msg) => new Error(`QuickAdd: ${msg}`);
+const error = (msg) => {errMsg = `QuickAdd: ${msg}`; console.log(errMsg); return new Error(`QuickAdd: ${msg}`)};
 const warn = (msg) => {console.log(`QuickAdd: ${msg}`); return null;};
 
 async function start(templater, choices) {
@@ -49,15 +49,11 @@ async function doQuickCapture(choice) {
         input = getFormattedValue(choice.format, input);
 
     if (await app.vault.adapter.exists(filePath)) {
-        const absFile = app.vault.getAbstractFileByPath(filePath);
-        let fileContent = await app.vault.cachedRead(absFile);
+        const file = await getFileByPath(filePath);
         
-        if (choice.prepend)
-            fileContent = `${fileContent}\n${input}`;
-        else
-            fileContent = `${input}\n${fileContent}`;
+        fileContent = await quickCaptureFileContentFormatter(choice, input, file);
 
-        await app.vault.modify(absFile, fileContent);
+        await app.vault.modify(file, fileContent);
     } else {
         const created = await createFileWithInput(filePath, input);
         if (!created) throw error("file could not be created.");
@@ -65,6 +61,38 @@ async function doQuickCapture(choice) {
 
     if (choice.appendLink)
         appendToCurrentLine(`[[${filePath}]]`);
+}
+
+async function quickCaptureFileContentFormatter(choice, input, file) {
+    const fileContent = await app.vault.cachedRead(file);
+
+    if (choice.prepend)
+        return `${fileContent}\n${input}`;
+    
+    const frontmatterEndPosition = await getFrontmatterEndPosition(file);
+    if (!frontmatterEndPosition)
+        return `${input}${fileContent}`;
+
+    const splitContent = fileContent.split("\n");
+    const frontmatter = splitContent.slice(0, frontmatterEndPosition + 1).join("\n");
+    const restFileContent = splitContent.slice(frontmatterEndPosition + 1).join("\n");
+
+    return `${frontmatter}\n${input}${restFileContent}`;
+    
+}
+
+async function getFrontmatterEndPosition(file) {
+    const fileCache = await this.app.metadataCache.getFileCache(file);
+
+    if (!fileCache || !fileCache.frontmatter) {
+        warn("could not get frontmatter. Maybe there isn't any.")
+        return 0;
+    };
+    
+    if (fileCache.frontmatter.position)
+        return fileCache.frontmatter.position.end.line;
+
+    return 0;
 }
 
 async function promptForValue(choice) {
@@ -82,7 +110,7 @@ async function promptForValue(choice) {
 
 async function addNewFileFromTemplate(choice, name) {
     const templateContent = await getTemplateData(choice.path);
-    if (!templateContent) throw error("could not get template content.");
+    if (templateContent === null) throw error("could not get template content.");
 
     const folder = await getOrCreateFolderForChoice(choice);
     if (!folder) throw error("could not get or create folder.");
@@ -135,11 +163,16 @@ function appendToCurrentLine(string) {
     editor.replaceSelection(`${selected}${string}`);
 }
 
-async function getTemplateData(templatePath) {
-    const templateFile = await app.vault.getAbstractFileByPath(templatePath);
+async function getFileByPath(path) {
+    const file = await app.vault.getAbstractFileByPath(path);
+    if (!file) throw error("file not found.");
+    if (file.children) throw error("file is folder.");
+    
+    return file;
+}
 
-    if (!templateFile) throw error("template file not found.");
-    if (templateFile.children) throw error("template file is folder.");
+async function getTemplateData(templatePath) {
+    const templateFile = await getFileByPath(templatePath);
     
     return await app.vault.cachedRead(templateFile);
 }
