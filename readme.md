@@ -178,7 +178,7 @@ const choices = [
 ```
 This choice is a little simpler, and primarily demonstrates the `task` property. If `task` is set to `true`, then `- [ ]` will be prepended to the value - no matter the format.
 
-Using this choice, I added `- [ ] a new task 📆 2021-05-27` to my `inbox/tasks.md` file.
+Using this choice, I added `- [ ] a new task 📆 2021-05-27` to my `inbox/tasks.md` file. This is what's used to denote a task date in the [Obsidian Tasks](https://github.com/schemar/obsidian-tasks) plugin.😉
 
 
 #### Main menu
