@@ -23,6 +23,7 @@ async function start(templater, choices) {
     } else {
         const needName = (!choice.format || (choice.format && NAME_VALUE_REGEX.test(choice.format)))
         const name = needName ? await promptForValue(choice) : "";
+        if (needName && !name) return null;
 
         outValue = await addNewFileFromTemplate(choice, name);
     }

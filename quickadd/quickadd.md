@@ -2,10 +2,11 @@
 const choices = [
         {option: "💭 Add a Thought", startSymbol: "~", path: "bins/templates/Inputs/Thought.md"},
         {option: "✔ Add a Task", startSymbol: "", path: "bins/templates/New Task.md", folder: "tasks"},
-        {option: "📥 Add an Inbox item", format: `{{DATE:gggg-MM-DD-HH-MM-SS}} - {{VALUE}}`, folder: "inbox", path: "bins/templates/Inbox Template.md"},
-        {option: "✍ Quick Capture", captureTo: "inbox/appendToInbox.md", format: "# [[{{DATE:gggg-MM-DD - ddd MMM D}}]] {{DATE:hh:mm}}\n{{LINKCURRENT}}: {{VALUE}}\n\n"},
+        {option: "📥 Add an Inbox item", format: `{{DATE:gggg-MM-DD-HH-MM-SS}} - {{NAME}}`, folder: "inbox", path: "bins/templates/Inbox Template.md"},
+        {option: "✍ Quick Capture", captureTo: "inbox/appendToInbox.md", format: "# [[{{DATE:gggg-MM-DD - ddd MMM D}}]] {{DATE:hh:mm}}\n{{LINKCURRENT}}: {{VALUE}}\n\n", prepend: false},
         {option: "✔ Quick Capture Task", captureTo: "inbox/tasks.md", task: true, format: "{{VALUE}} 📆 {{DATE}}"}
 ]
 
-tR = await tp.user.QuickAdd(tp, choices);
+const out = await tp.user.QuickAdd(tp, choices);
+if (out) tR = out;
 %>
