@@ -50,13 +50,61 @@ It should be able to fetch anything from any time.
 #### Write one highlight (select highlight)
 ![image](https://user-images.githubusercontent.com/29108628/119146122-9bd97c80-ba4a-11eb-984c-a8c0dc821a65.png)
 
-### https://github.com/chhoumann/Templater_Templates/tree/master/quickadd
-Add a new page given a template. Can prepend a 'start symbol', which can be used to denote literature notes and the likes.
-You can select the text, start symbol, and template to add.
+### [QuickAdd v2](https://github.com/chhoumann/Templater_Templates/tree/master/quickadd)
+Quickly add new pages or content to your vault. Powerful and customizable Templater 'plugin'.
 
-In the default markdown file (`QuickAdd.md`), there is an array assigned to `choices`. Every element (choice) in this array must have an option name and a path to the template to insert. Choices should be separated by commas.
+In the default markdown file (`QuickAdd.md`), there is an array assigned to `choices`. Every element (choice) in this array must have an option name and a path to the template to insert. Choices should be separated by commas. The choices found in the default markdown file (`QuickAdd.md`) are my own settings. You might draw inspiration from them.
 
-Choices are in JavaScript object format, which consists of key-value pairs. They should be separated by commas. Like this: `{key1: value1, key2: value2}`.
+Choices are written in JavaScript object format, which consists of key-value pairs. They should be separated by commas. Like this: `{key1: value1, key2: value2}`.
+There are two main contexts to be aware of. Adding from a template, and quick capture. I'll illustrate them by example.
+
+#### Add from Template
+| Property    | Required | Type                   | Description                                                                                                                                                |
+| ----------- | -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Option      | Yes      | String                 | The string shown in the suggester                                                                                                                          |
+| Path        | Yes      | String                 | Path to the template you want to add a new file with.                                                                                                      |
+| startSymbol | No       | String                 | A symbol which will be added, with a space, before the file name.                                                                                          |
+| folder      | No       | String or string array | The folder to which the file will be added. If an array of strings is added, you will be prompted to select one.                                           |
+| format      | No       | String                 | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one. |
+| appendLink  | No       | Boolean                | If `true`, a link to the file you've added is written to your cursor position.                                                                             |
+
+#### Quick Capture
+| Property   | Required | Type    | Description                                                                                                                                                |
+| ---------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Option     | Yes      | String  | The string shown in the suggester.                                                                                                                         |
+| captureTo  | Yes      | String  | The file values are written to.                                                                                                                            |
+| format     | No       | String  | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one. |
+| prepend    | No       | Boolean | If `true`, value will be added to the bottom of the file. Default is false.                                                                                |
+| appendLink | No       | Boolean | If `true`, a link to the file you've captured to is written to your cursor position.                                                                       |
+| Task       | No       | Boolean | If `true`, the value will be preceded by a `- [ ]`.                                                                                                        |
+
+
+#### `format` syntax
+| Template                  | Description                                                                                           |
+| ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `{{DATE}}`                | Outputs the current date in `YYYY-MM-DD` format.                                                       |
+| `{{DATE:<DATEFORMAT>}}`   | Replace `<DATEFORMAT>` with a [Moment.js date format](https://momentjs.com/docs/#/displaying/format/). |
+| `{{VALUE}}` or `{{NAME}}` | Interchangeable. Represents the value given in an input prompt.                                       |
+| `{{LINKCURRENT}}`         | A link to the file from which the template is activated from. `[[link]]` format.                      | 
+
+
+#### Add from Template 1
+Below is an example object representing one choice in the array.
+```js
+const choices = [
+	{
+		option: "💭 Add a Thought", 
+		path: "bins/templates/Inputs/Thought.md",
+		startSymbol: "~", // optional
+		folder: "thoughts" // optional
+	},
+	// ...
+]
+
+// ...
+```
+
+This choice would be displayed as `💭 Add a Thought` in the choice suggester. If selected, it would add a new file using the template found in `bins/templates/Inputs/Thought.md`. It prompts for a value, which is the name of the file.
 
 There are two optional keys: `startSymbol` and `folder`. 
 
@@ -64,22 +112,80 @@ The start symbol is prepended to the name you enter when running the script. For
 
 The folder key represents which folder your item will be created in. If it does not exist, it will be made. `folder` can be either a single string, like: `folder: "folderName"`, or an array of strings: `folder: ["projects/one", "projects/two", "projects/three"]`.
 
-Below is an example object representing one choice in the array.
-
+#### Add from Template 2
 ```js
-{
-  option: "💭 Add a Thought", 
-  startSymbol: "~", 
-  path: "bins/templates/Inputs/Thought.md",
-  folder: "thoughts"
-}
+const choices = [
+	 {
+	 	option: "📥 Add an Inbox item",
+		path: "bins/templates/Inbox Template.md"},
+		format: `{{DATE:gggg-MM-DD-HH-MM-SS}} - {{NAME}}`,
+		folder: "inbox",
+	},
+	// ...
+]
+
+// ...
 ```
 
-### Main menu
+This example is much like the one above. The main difference is the `format` property. This formats the file name with the format defined in the string.
+
+Format has three 'template' values. `{{DATE}}`, `{{LINKCURRENT}}` and `{{NAME}}`. Name has an alias, `{VALUE}}`, which you can use interchangeably. I'll explain `{{LINKCURRENT}}` in the Quick Capture 1 example.
+
+If you write `{{DATE}}`, it'll give today's date in the `yyyy-mm-dd` format. You can pass in another date format - like the one shown in the example - but you will have to add a colon between `DATE` and the specified format. Example: `{{DATE:gggg-MM-DD-HH-MM-SS}}`.
+The one in the example would set the value to `2021-05-27-04-08-14`. The date format is the [Momentjs format](https://momentjs.com/docs/#/displaying/format/), and relies on Templater to parse it.
+
+Besides this, the format is a simple string, so you can pass in any string value you want. Because Templater allows for Javascript execution, you can make some creative formats using [template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals).
+
+#### Quick Capture 1
+```js
+const choices = [
+	 {
+	 	option: "✍ Quick Capture", 
+		captureTo: "inbox/appendToInbox.md", 
+		format: "# [[{{DATE:gggg-MM-DD - ddd MMM D}}]] {{DATE:hh:mm}}\n{{LINKCURRENT}}: {{VALUE}}\n\n",
+		prepend: false,
+		appendLink: false
+	}
+	// ...
+]
+
+// ...
+```
+
+Now, quick captures are defined by the `captureTo` property. It should be given the path to a file which you would like to write to. By default, what you're trying to do a quick capture of will be written to the top of the document. You can use `prepend: true` to make it go to the bottom of the document. Another notable property is `appendLink`. If you set this property to true, the template will drop a link to the file you captured to.
+
+Selecting this choice, a value corrresponding to the format will be added to the `inbox/appendToInbox.md` file. Running this, I added the following to my file:
+```
+# [[2021-05-27 - Thu May 27]] 03:57
+[[bins/templates/QuickAdd.md]]: this is an example
+
+
+```
+
+#### Quick Capture 2
+```js
+const choices = [
+	 {
+	 	option: "✔ Quick Capture Task", 
+		captureTo: "inbox/tasks.md", 
+		task: true, 
+		format: "{{VALUE}} 📆 {{DATE}}"
+	}
+	// ...
+]
+
+// ...
+```
+This choice is a little simpler, and primarily demonstrates the `task` property. If `task` is set to `true`, then `- [ ]` will be prepended to the value - no matter the format.
+
+Using this choice, I added `- [ ] a new task 📆 2021-05-27` to my `inbox/tasks.md` file.
+
+
+#### Main menu
 ![image](https://user-images.githubusercontent.com/29108628/119146591-0f7b8980-ba4b-11eb-8fac-ab275067434f.png)
-### Add
+#### Add
 ![image](https://user-images.githubusercontent.com/29108628/119146655-21f5c300-ba4b-11eb-9aa4-dd105cd430f8.png)
-### Start symbol (~)
+#### Start symbol (~)
 ![image](https://user-images.githubusercontent.com/29108628/119146711-31750c00-ba4b-11eb-9531-d737c9b71cd6.png)
 
 ### [Books (dataview)](https://github.com/chhoumann/Templater_Templates/tree/master/books)
