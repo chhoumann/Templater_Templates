@@ -72,7 +72,7 @@ async function doQuickCapture(choice) {
 }
 
 async function quickCaptureFileContentFormatter(choice, input, file) {
-    const fileContent = await app.vault.cachedRead(file);
+    const fileContent = await app.vault.read(file);
 
     if (choice.prepend)
         return `${fileContent}\n${input}`;
