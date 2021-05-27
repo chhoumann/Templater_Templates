@@ -10,12 +10,15 @@ const LINK_TO_CURRENT_FILE_REGEX = new RegExp(/{{LINKCURRENT}}/);
 const MARKDOWN_FILE_EXTENSION_REGEX = new RegExp(/\.md$/);
 const endsWithMd = (str) => MARKDOWN_FILE_EXTENSION_REGEX.test(str);
 
+const error = (msg) => new Error(`QuickAdd: ${msg}`);
+const warn = (msg) => {console.log(`QuickAdd: ${msg}`); return null;};
+
 async function start(templater, choices) {
-    if (!templater) return; else tp = templater;
-    if (!choices) return;
+    if (!templater) throw error("templater not provided."); else tp = templater;
+    if (!choices) throw error("no choices provided.");
 
     const choice = await tp.system.suggester(choice => choice.option, choices);
-    if (!choice) return;
+    if (!choice) return warn("no choice selected.");
 
     let outValue;
     if (choice.captureTo && typeof choice.captureTo === "string") {
@@ -23,7 +26,7 @@ async function start(templater, choices) {
     } else {
         const needName = (!choice.format || (choice.format && NAME_VALUE_REGEX.test(choice.format)))
         const name = needName ? await promptForValue(choice) : "";
-        if (needName && !name) return null;
+        if (needName && !name) return warn("no filename provided.");
 
         outValue = await addNewFileFromTemplate(choice, name);
     }
@@ -39,7 +42,7 @@ async function doQuickCapture(choice) {
         choice.captureTo : `${choice.captureTo}.md`;
 
     let input = await promptForValue(choice);
-    if (!input) return null;
+    if (!input) return warn("no input given.");
 
     if (choice.task)
         input = `- [ ] ${input}`;
@@ -59,7 +62,7 @@ async function doQuickCapture(choice) {
         await app.vault.modify(absFile, fileContent);
     } else {
         const created = await createFileWithInput(filePath, input);
-        if (!created) return null;
+        if (!created) throw error("file could not be created.");
     }
 
     return filePath;
@@ -80,27 +83,30 @@ async function promptForValue(choice) {
 
 async function addNewFileFromTemplate(choice, name) {
     const templateContent = await getTemplateData(choice.path);
-    if (!templateContent) return null;
+    if (!templateContent) throw error("could not get template content.");
 
     const folder = await getOrCreateFolderForChoice(choice);
-    if (!folder) return null;
+    if (!folder) throw error("could not get or create folder.");
 
     let fileName = choice.format ? 
         getFormattedFileName(choice.format, name, folder) :
         getFileName(choice, folder, name);
 
-    const created = await createFileWithInput(fileName, templateContent);
+    const formattedTemplateContent = getFormattedValue(templateContent, templateContent);
+
+    const created = await createFileWithInput(fileName, formattedTemplateContent);
     app.workspace.activeLeaf.openFile(created);
 
     return fileName;
 }
 
 async function getTemplateData(templatePath) {
-    const templateFile = await app.vault.getMarkdownFiles().find(f => f.path === templatePath);
+    const templateFile = await app.vault.getAbstractFileByPath(templatePath);
+
+    if (!templateFile) throw error("template file not found.");
+    if (templateFile.children) throw error("template file is folder.");
     
-    if (!templateFile) return null;
-    
-    return await app.vault.read(templateFile);
+    return await app.vault.cachedRead(templateFile);
 }
 
 async function createFileWithInput(filePath, input) {
