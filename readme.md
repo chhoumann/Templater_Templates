@@ -176,6 +176,8 @@ Simple markdown templates that augment workflow.
 1. Make sure you've set a path to "Template folder location" in your Templater settings.
 2. Add the `.md` file ot the folder you've set as your "Template folder location". Make sure this is the _raw_ markdown file. See instructions at the top of the page.
 
+https://user-images.githubusercontent.com/29108628/119813486-a0d67a00-bee9-11eb-9e5b-7bed3f9eccee.mp4
+
 ### https://github.com/chhoumann/Templater_Templates/blob/master/code.md
 Insert a codebox with the language specifed. Has two predefined languages.
 ![image](https://user-images.githubusercontent.com/29108628/119144684-333dd000-ba49-11eb-9ac6-0cbdc097c35c.png)
