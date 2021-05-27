@@ -148,6 +148,22 @@ This choice is a little simpler, and primarily demonstrates the `task` property.
 
 Using this choice, I added `- [ ] a new task 📆 2021-05-27` to my `inbox/tasks.md` file. This is what's used to denote a task date in the [Obsidian Tasks](https://github.com/schemar/obsidian-tasks) plugin.😉
 
+#### Quick Capture 3
+```js
+const choices = [
+	 {
+		option: "🚶‍♂️ Add journal item", 
+	 	captureTo: "bins/daily/{{DATE:gggg-MM-DD - ddd MMM D}}", // My daily journal file name format and folder
+		insertAfter: "## What did I do today?", // Looks for this line and inserts the text below it
+		format: "- {{DATE:HH:MM}} {{VALUE}}\n"}, // Format of the entry
+	// ...
+]
+
+// ...
+```
+
+This quick capture choice lets me quickly add journal entry points to my daily journal.
+It'll be in this format: `- 18:05 Cooked dinner`.
 
 #### Main menu
 ![image](https://user-images.githubusercontent.com/29108628/119146591-0f7b8980-ba4b-11eb-8fac-ab275067434f.png)
