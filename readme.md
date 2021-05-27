@@ -155,7 +155,7 @@ const choices = [
 		option: "🚶‍♂️ Add journal item", 
 	 	captureTo: "bins/daily/{{DATE:gggg-MM-DD - ddd MMM D}}", // My daily journal file name format and folder
 		insertAfter: "## What did I do today?", // Looks for this line and inserts the text below it
-		format: "- {{DATE:HH:MM}} {{VALUE}}\n"}, // Format of the entry
+		format: "- {{DATE:HH:mm}} {{VALUE}}\n"}, // Format of the entry
 	// ...
 ]
 
