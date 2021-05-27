@@ -32,16 +32,17 @@ There are two main contexts to be aware of. Adding from a template, and quick ca
 | folder      | No       | String or string array | The folder to which the file will be added. If an array of strings is added, you will be prompted to select one.                                           |
 | format      | No       | String                 | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one. |
 | appendLink  | No       | Boolean                | If `true`, a link to the file you've added is written to your cursor position.                                                                             |
+| noOpen      | No       | Boolean                | If `true`, the created file is not opened                                                                                                                                                           |
 
 #### Quick Capture
-| Property   | Required | Type    | Description                                                                                                                                                |
-| ---------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Option     | Yes      | String  | The string shown in the suggester.                                                                                                                         |
-| captureTo  | Yes      | String  | The file values are written to.                                                                                                                            |
-| format     | No       | String  | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one. |
-| prepend    | No       | Boolean | If `true`, value will be added to the bottom of the file. Default is false.                                                                                |
-| appendLink | No       | Boolean | If `true`, a link to the file you've captured to is written to your cursor position.                                                                       |
-| Task       | No       | Boolean | If `true`, the value will be preceded by a `- [ ]`.                                                                                                        |
+| Property   | Required | Type    | Description                                                                                                                                                                                                                                                                                   |
+| ---------- | -------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Option     | Yes      | String  | The string shown in the suggester. You can use the same syntax as `format` to create other filenames, which act as quickcapture files. For example, you could write `captureTo: "daily/{{DATE}}.md"`, and it will capture to a file with the current date as it's name in the `daily` folder. | 
+| captureTo  | Yes      | String  | The file values are written to.                                                                                                                                                                                                                                                               |
+| format     | No       | String  | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one.                                                                                                                                    |
+| prepend    | No       | Boolean | If `true`, value will be added to the bottom of the file. Default is false.                                                                                                                                                                                                                   |
+| appendLink | No       | Boolean | If `true`, a link to the file you've captured to is written to your cursor position.                                                                                                                                                                                                          |
+| Task       | No       | Boolean | If `true`, the value will be preceded by a `- [ ]`.                                                                                                                                                                                                                                           |
 
 
 #### `format` syntax
