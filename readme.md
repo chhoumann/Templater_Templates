@@ -5,6 +5,15 @@ Found a template your like? Make sure you copy the raw file - not what Github re
 ## Scripts
 You will have to define a folder for your userscripts in Templater. Do this in your Templater settings under "Script files folder location". Remember, the scripts are called like this: `tp.user.QuickAdd(tp, choices);`, where `QuickAdd` is the _case-sensitive_ name of thie file. So, if you change the file name, change it in the markdown template as well.
 
+#### Installation of Scripts
+1. Grab both the `.md` and `.js` file. Make sure it is the _raw_ markdown file.
+2. Make sure you've set a file path to "Script files folder location" as well as a "Template folder location" in your Templater settings.
+3. Add the `.md` file ot the folder you've set as your "Template folder location".
+4. Add the `.js` file ot the folder you've set as your "Script files folder location".
+
+
+https://user-images.githubusercontent.com/29108628/119812018-fa3da980-bee7-11eb-856a-02cd034055fc.mp4
+
 ### [QuickAdd v2](https://github.com/chhoumann/Templater_Templates/tree/master/quickadd)
 Quickly add new pages or content to your vault. Powerful and customizable Templater 'plugin'.
 
@@ -161,7 +170,15 @@ This is a dataview query.
 
 
 ## Templates
-## https://github.com/chhoumann/Templater_Templates/blob/master/code.md
+Simple markdown templates that augment workflow.
+
+#### Installation
+1. Make sure you've set a path to "Template folder location" in your Templater settings.
+2. Add the `.md` file ot the folder you've set as your "Template folder location". Make sure this is the _raw_ markdown file. See instructions at the top of the page.
+
+https://user-images.githubusercontent.com/29108628/119813486-a0d67a00-bee9-11eb-9e5b-7bed3f9eccee.mp4
+
+### https://github.com/chhoumann/Templater_Templates/blob/master/code.md
 Insert a codebox with the language specifed. Has two predefined languages.
 ![image](https://user-images.githubusercontent.com/29108628/119144684-333dd000-ba49-11eb-9ac6-0cbdc097c35c.png)
 
