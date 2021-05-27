@@ -3,6 +3,8 @@ let tp;
 const defaultFolder = "/";
 const defaultStartSymbol = "";
 
+const FILE_NUMBER_REGEX = new RegExp(/([0-9]*).md$/);
+
 const DATE_REGEX = new RegExp(/{{DATE}}|{{DATE:([^}\n\r]*)}}/);
 const NAME_VALUE_REGEX = new RegExp(/{{NAME}}|{{VALUE}}/);
 const LINK_TO_CURRENT_FILE_REGEX = new RegExp(/{{LINKCURRENT}}/);
@@ -89,6 +91,9 @@ async function addNewFileFromTemplate(choice, name) {
         getFormattedFileName(choice.format, name, folder) :
         getFileName(choice, folder, name);
 
+    if (choice.incrementFileName)
+        fileName = await incrementFileName(fileName);
+
     const formattedTemplateContent = getFormattedValue(templateContent, templateContent);
 
     const created = await createFileWithInput(fileName, formattedTemplateContent);
@@ -101,6 +106,27 @@ async function addNewFileFromTemplate(choice, name) {
         app.workspace.activeLeaf.openFile(created);
 
     return fileName;
+}
+
+async function incrementFileName(fileName) {
+    const numStr = FILE_NUMBER_REGEX.exec(fileName)[1];
+    const fileExists = await app.vault.adapter.exists(fileName);
+    let newFileName = fileName;
+
+    if (fileExists && numStr) {
+        const number = parseInt(numStr);
+        if (!number) throw error("detected numbers but couldn't get them.")
+        
+        newFileName = newFileName.replace(FILE_NUMBER_REGEX, `${number + 1}.md`);
+    } else if (fileExists) {
+        newFileName = newFileName.replace(FILE_NUMBER_REGEX, `${1}.md`);
+    }
+
+    const newFileExists = await app.vault.adapter.exists(newFileName);
+    if (newFileExists) 
+        newFileName = await incrementFileName(newFileName);
+
+    return newFileName;
 }
 
 function appendToCurrentLine(string) {

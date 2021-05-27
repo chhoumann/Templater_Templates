@@ -24,15 +24,16 @@ Choices are written in JavaScript object format, which consists of key-value pai
 There are two main contexts to be aware of. Adding from a template, and quick capture. I'll illustrate them by example.
 
 #### Add from Template
-| Property    | Required | Type                   | Description                                                                                                                                                |
-| ----------- | -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Option      | Yes      | String                 | The string shown in the suggester                                                                                                                          |
-| Path        | Yes      | String                 | Path to the template you want to add a new file with.                                                                                                      |
-| startSymbol | No       | String                 | A symbol which will be added, with a space, before the file name.                                                                                          |
-| folder      | No       | String or string array | The folder to which the file will be added. If an array of strings is added, you will be prompted to select one.                                           |
-| format      | No       | String                 | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one. |
-| appendLink  | No       | Boolean                | If `true`, a link to the file you've added is written to your cursor position.                                                                             |
-| noOpen      | No       | Boolean                | If `true`, the created file is not opened                                                                                                                                                           |
+| Property          | Required | Type                   | Description                                                                                                                                                |
+| ----------------- | -------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Option            | Yes      | String                 | The string shown in the suggester                                                                                                                          |
+| Path              | Yes      | String                 | Path to the template you want to add a new file with.                                                                                                      |
+| startSymbol       | No       | String                 | A symbol which will be added, with a space, before the file name.                                                                                          |
+| folder            | No       | String or string array | The folder to which the file will be added. If an array of strings is added, you will be prompted to select one.                                           |
+| format            | No       | String                 | The format of the filename. See `format` table for more info. Note: if no `{{NAME}}` or `{{VALUE}}` is in the format, you will not be prompted to add one. |
+| appendLink        | No       | Boolean                | If `true`, a link to the file you've added is written to your cursor position.                                                                             |
+| noOpen            | No       | Boolean                | If `true`, the created file is not opened                                                                                                                  |
+| incrementFileName | No       | Boolean                | If `true`, and if a file with the given name is found, it will add 1 to the file name. Like, `untitled`, `untitled1`, `untitled2`, and so on.                                                                                                                                                           |
 
 #### Quick Capture
 | Property   | Required | Type    | Description                                                                                                                                                                                                                                                                                   |
