@@ -12,11 +12,19 @@ const LINK_TO_CURRENT_FILE_REGEX = new RegExp(/{{LINKCURRENT}}/);
 const MARKDOWN_FILE_EXTENSION_REGEX = new RegExp(/\.md$/);
 const endsWithMd = (str) => MARKDOWN_FILE_EXTENSION_REGEX.test(str);
 
-const error = (msg) => {errMsg = `QuickAdd: ${msg}`; console.log(errMsg); return new Error(`QuickAdd: ${msg}`)};
-const warn = (msg) => {console.log(`QuickAdd: ${msg}`); return null;};
+const error = (msg) => {
+    errMsg = `QuickAdd: ${msg}`;
+    console.log(errMsg);
+    return new Error(`QuickAdd: ${msg}`)
+};
+const warn = (msg) => {
+    console.log(`QuickAdd: ${msg}`);
+    return null;
+};
 
 async function start(templater, choices) {
-    if (!templater) throw error("templater not provided."); else tp = templater;
+    if (!templater) throw error("templater not provided.");
+    else tp = templater;
     if (!choices) throw error("no choices provided.");
 
     const choice = await tp.system.suggester(choice => choice.option, choices);
@@ -50,7 +58,7 @@ async function doQuickCapture(choice) {
 
     if (await app.vault.adapter.exists(filePath)) {
         const file = await getFileByPath(filePath);
-        
+
         fileContent = await quickCaptureFileContentFormatter(choice, input, file);
 
         await app.vault.modify(file, fileContent);
@@ -68,17 +76,28 @@ async function quickCaptureFileContentFormatter(choice, input, file) {
 
     if (choice.prepend)
         return `${fileContent}\n${input}`;
-    
+
+    if (choice.insertAfter && typeof choice.insertAfter === "string") {
+        const targetRegex = new RegExp(`\s*${choice.insertAfter}\s*`)
+        const targetPosition = fileContent.split("\n").findIndex(line => targetRegex.test(line));
+        if (!targetPosition) throw error("insertAfter was given but line was not found.");
+
+        return insertTextAfterPositionInBody(input, fileContent, targetPosition);
+    }
+
     const frontmatterEndPosition = await getFrontmatterEndPosition(file);
     if (!frontmatterEndPosition)
         return `${input}${fileContent}`;
 
-    const splitContent = fileContent.split("\n");
-    const frontmatter = splitContent.slice(0, frontmatterEndPosition + 1).join("\n");
-    const restFileContent = splitContent.slice(frontmatterEndPosition + 1).join("\n");
+    return insertTextAfterPositionInBody(input, fileContent, frontmatterEndPosition);
+}
 
-    return `${frontmatter}\n${input}${restFileContent}`;
-    
+function insertTextAfterPositionInBody(text, body, pos) {
+    const splitContent = body.split("\n");
+    const pre = splitContent.slice(0, pos + 1).join("\n");
+    const post = splitContent.slice(pos + 1).join("\n");
+
+    return `${pre}\n${text}${post}`;
 }
 
 async function getFrontmatterEndPosition(file) {
@@ -88,7 +107,7 @@ async function getFrontmatterEndPosition(file) {
         warn("could not get frontmatter. Maybe there isn't any.")
         return 0;
     };
-    
+
     if (fileCache.frontmatter.position)
         return fileCache.frontmatter.position.end.line;
 
@@ -115,7 +134,7 @@ async function addNewFileFromTemplate(choice, name) {
     const folder = await getOrCreateFolderForChoice(choice);
     if (!folder) throw error("could not get or create folder.");
 
-    let fileName = choice.format ? 
+    let fileName = choice.format ?
         getFormattedFileName(choice.format, name, folder) :
         getFileName(choice, folder, name);
 
@@ -144,14 +163,14 @@ async function incrementFileName(fileName) {
     if (fileExists && numStr) {
         const number = parseInt(numStr);
         if (!number) throw error("detected numbers but couldn't get them.")
-        
+
         newFileName = newFileName.replace(FILE_NUMBER_REGEX, `${number + 1}.md`);
     } else if (fileExists) {
         newFileName = newFileName.replace(FILE_NUMBER_REGEX, `${1}.md`);
     }
 
     const newFileExists = await app.vault.adapter.exists(newFileName);
-    if (newFileExists) 
+    if (newFileExists)
         newFileName = await incrementFileName(newFileName);
 
     return newFileName;
@@ -167,13 +186,13 @@ async function getFileByPath(path) {
     const file = await app.vault.getAbstractFileByPath(path);
     if (!file) throw error("file not found.");
     if (file.children) throw error("file is folder.");
-    
+
     return file;
 }
 
 async function getTemplateData(templatePath) {
     const templateFile = await getFileByPath(templatePath);
-    
+
     return await app.vault.cachedRead(templateFile);
 }
 
@@ -214,8 +233,8 @@ async function getOrCreateFolder(folder) {
 
 function getFileName(choice, folder, name) {
     let modStartSymbol = defaultStartSymbol;
-        if (choice.startSymbol && typeof choice.startSymbol === "string")
-            modStartSymbol = choice.startSymbol + " ";
+    if (choice.startSymbol && typeof choice.startSymbol === "string")
+        modStartSymbol = choice.startSymbol + " ";
 
     return `${folder}/${modStartSymbol}${name}.md`;
 }
@@ -237,10 +256,10 @@ function getFormattedValue(format, value) {
 function replaceDateInFileName(fileName) {
     let output = fileName;
 
-    while(DATE_REGEX.test(output)){
+    while (DATE_REGEX.test(output)) {
         const dateMatch = DATE_REGEX.exec(output);
 
-        output = dateMatch.length > 0 ? 
+        output = dateMatch.length > 0 ?
             output.replace(DATE_REGEX, tp.date.now(dateMatch[1])) :
             output.replace(DATE_REGEX, tp.date.now());
     }
@@ -251,7 +270,7 @@ function replaceDateInFileName(fileName) {
 function replaceValueInFileName(fileName, value) {
     let output = fileName;
 
-    while(NAME_VALUE_REGEX.test(output))
+    while (NAME_VALUE_REGEX.test(output))
         output = output.replace(NAME_VALUE_REGEX, value);
 
     return output;
@@ -261,7 +280,7 @@ function replaceLinkToCurrentFileInFileName(fileName) {
     const currentFilePath = `[[${tp.file.path(true)}]]`;
     let output = fileName;
 
-    while(LINK_TO_CURRENT_FILE_REGEX.test(output))
+    while (LINK_TO_CURRENT_FILE_REGEX.test(output))
         output = output.replace(LINK_TO_CURRENT_FILE_REGEX, currentFilePath);
 
     return output;
