@@ -97,7 +97,7 @@ function formatDailyQuote(sourceText, sourceItem) {
         return `> ${line}`;
     });
 
-    const attr = `\n>\- ${sourceItem.author}, _${sourceItem.title}_`;
+    const attr = `\n>\\- ${sourceItem.author}, _${sourceItem.title}_`;
 
     return `${quote}${attr}`;
 }
