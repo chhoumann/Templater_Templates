@@ -2,13 +2,16 @@ module.exports = start;
 const apiUrl = "https://readwise.io/api/v2/";
 const books = "📚 Books", articles = "📰 Articles", tweets = "🐤 Tweets", supplementals = "💭 Supplementals", podcasts = "🎙 Podcasts", searchAll = "🔍 Search All Highlights (slow!)";
 const categories = {books, articles, tweets, supplementals, podcasts, searchAll};
+const randomNumberInRange = (max) => Math.floor(Math.random() * max);
 
 let token;
 let tp;
 
-async function start(templater, readwiseToken) {
+async function start(templater, readwiseToken, dailyQuote = false) {
     tp = templater;
     token = readwiseToken;
+    if (dailyQuote) return await getDailyQuote();
+
     let highlights;
     const category = await categoryPromptHandler();
     if (!category) return;
@@ -32,6 +35,24 @@ async function start(templater, readwiseToken) {
     const textToAppend = await highlightsPromptHandler(highlights);
 
     return !textToAppend ? "" : textToAppend; 
+}
+
+async function getDailyQuote() {
+    const category = "supplementals";
+    const res = await getHighlightsByCategory(category);
+    if (!res) return;
+
+    const {results} = res;
+    const targetItem = results[randomNumberInRange(results.length)];
+
+    const {results: highlights} = await getHighlightsForElement(targetItem);
+    if (!highlights) return;
+
+    const randomHighlight = highlights[randomNumberInRange(highlights.length)];
+    
+    const quote = formatDailyQuote(randomHighlight.text, targetItem);
+
+    return `${quote}`
 }
 
 async function categoryPromptHandler() {
@@ -69,6 +90,16 @@ async function writeOneHandler(highlights) {
     const {quote, note} = textFormatter(chosenHighlight.text, chosenHighlight.note);
 
     return `${quote}${note}`;
+}
+
+function formatDailyQuote(sourceText, sourceItem) {
+    let quote = sourceText.split("\n").filter(line => line != "").map(line => {
+        return `> ${line}`;
+    });
+
+    const attr = `\n>- ${sourceItem.author}, _${sourceItem.title}_`;
+
+    return `${quote}${attr}`;
 }
 
 function textFormatter(sourceText, sourceNote) {

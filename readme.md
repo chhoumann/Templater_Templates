@@ -178,6 +178,8 @@ It'll be in this format: `- 18:05 Cooked dinner`.
 Insert anything from your Readwise account. You will need your Readwise token - which you can get [here](https://readwise.io/access_token).
 It should be able to fetch anything from any time.
 
+To get the main menu, use the `readwise.md` template. If you want to have a quote fetched from your "supplementals", you can use `readwisedaily.md`. I use that one in my daily note to show me a quote from one of the books I've marked as "supplemental".
+
 #### Main menu
 ![Obsidian_UfeK41i3zb](https://user-images.githubusercontent.com/29108628/119157789-d3015b00-ba55-11eb-847d-58de6f721948.png)
 #### Books
