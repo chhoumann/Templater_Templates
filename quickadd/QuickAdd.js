@@ -149,8 +149,14 @@ async function addNewFileFromTemplate(choice, name) {
     if (choice.appendLink)
         appendToCurrentLine(`[[${created.path.replace('.md', '')}]]`);
 
-    if (!choice.noOpen)
-        app.workspace.activeLeaf.openFile(created);
+    if (!choice.noOpen) {
+        if (!choice.newTab)
+            app.workspace.activeLeaf.openFile(created);
+        else if (choice.newTab === "vertical" || choice.newTab === "horizontal")
+            app.workspace.splitActiveLeaf(choice.newTab).openFile(created);
+        else
+            throw error("invalid newTab syntax.")
+    }
 
     return fileName;
 }
