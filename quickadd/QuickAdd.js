@@ -147,7 +147,7 @@ async function addNewFileFromTemplate(choice, name) {
     if (!created) return error("could not create file.");
 
     if (choice.appendLink)
-        appendToCurrentLine(`[[${created.path}]]`);
+        appendToCurrentLine(`[[${created.path.replace('.md', '')}]]`);
 
     if (!choice.noOpen)
         app.workspace.activeLeaf.openFile(created);
