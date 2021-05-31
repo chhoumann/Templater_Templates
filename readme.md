@@ -57,6 +57,23 @@ There are two main contexts to be aware of. Adding from a template, and quick ca
 | `{{LINKCURRENT}}`         | A link to the file from which the template is activated from. `[[link]]` format.                      | 
 
 
+#### Multi-Choice
+```js
+const choices = [
+	{option: "🌀 Task Manager", multi: [
+		{option: "✔ Add a Task", startSymbol: "", path: "bins/templates/New Task.md", folder: "tasks"},
+		{option: "✔ Quick Capture Task", captureTo: "inbox/tasks.md", task: true, format: "{{VALUE}} 📆 {{DATE}}\n"},
+		{option: "✔ MetaEdit Backlog Task", captureTo: "MetaEdit Board.md", task: true, insertAfter: "## Backlog", format: "{{VALUE}}\n"},
+	]},
+	// ...
+]
+
+// ...
+```
+
+You can categorize choices under a single, multi-choice. These can also be nested, meaning that you can have multi-choices within multi-choices.
+
+
 #### Add from Template 1
 Below is an example object representing one choice in the array.
 ```js
