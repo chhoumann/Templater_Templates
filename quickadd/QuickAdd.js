@@ -27,18 +27,23 @@ async function start(templater, choices) {
     else tp = templater;
     if (!choices) throw error("no choices provided.");
 
-    const choice = await tp.system.suggester(choice => choice.option, choices);
-    if (!choice) return warn("no choice selected.");
+    const choice = await getChoice(choices);
+    if (!choice) return;
 
     if (choice.captureTo && typeof choice.captureTo === "string") {
         await doQuickCapture(choice);
+    } else if (choice.path == typeof choice.path === "string") {
+        await addNewFileFromTemplate(choice);
     } else {
-        const needName = (!choice.format || (choice.format && NAME_VALUE_REGEX.test(choice.format)))
-        const name = needName ? await promptForValue(choice) : "";
-        if (needName && !name) return warn("no filename provided.");
-
-        await addNewFileFromTemplate(choice, name);
+        throw error(`invalid choice: ${choice.option || choice}`);
     }
+}
+
+async function getChoice(choices) {
+    const choice = await tp.system.suggester(choice => choice.option, choices);
+    if (!choice) return warn("no choice selected.");
+
+    return (choice.multi && choice.multi[Symbol.iterator]) ? await getChoice(choice.multi) : choice;
 }
 
 async function doQuickCapture(choice) {
@@ -127,7 +132,11 @@ async function promptForValue(choice) {
     return value;
 }
 
-async function addNewFileFromTemplate(choice, name) {
+async function addNewFileFromTemplate(choice) {
+    const needName = (!choice.format || (choice.format && NAME_VALUE_REGEX.test(choice.format)))
+    const name = needName ? await promptForValue(choice) : "";
+    if (needName && !name) return warn("no filename provided.");
+
     const templateContent = await getTemplateData(choice.path);
     if (templateContent === null) throw error("could not get template content.");
 
