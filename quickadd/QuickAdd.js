@@ -15,7 +15,8 @@ const endsWithMd = (str) => MARKDOWN_FILE_EXTENSION_REGEX.test(str);
 const error = (msg) => {
     errMsg = `QuickAdd: ${msg}`;
     console.log(errMsg);
-    return new Error(`QuickAdd: ${msg}`)
+    new Notice(errMsg, 5000);
+    return new Error(errMsg);
 };
 const warn = (msg) => {
     console.log(`QuickAdd: ${msg}`);
@@ -32,7 +33,7 @@ async function start(templater, choices) {
 
     if (choice.captureTo && typeof choice.captureTo === "string") {
         await doQuickCapture(choice);
-    } else if (choice.path == typeof choice.path === "string") {
+    } else if (choice.path && typeof choice.path === "string") {
         await addNewFileFromTemplate(choice);
     } else {
         throw error(`invalid choice: ${choice.option || choice}`);
