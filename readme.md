@@ -91,6 +91,23 @@ const choices = [
 You can categorize choices under a single, multi-choice. These can also be nested, meaning that you can have multi-choices within multi-choices.
 
 
+#### Variables
+```js
+const choices = [
+	{
+		option: "💸 Add Purchase", 
+		captureTo: "workbench.md", 
+		format:`|{{VALUE:Item}} | {{VALUE:💸 Cost}} | [[{{DATE:gggg-MM-DD - ddd MMM D}}]] | {{VALUE:Entertainment, Car, Groceries, Apartment}} |`,
+		prepend: true
+	},
+	// ...
+]
+
+// ...
+```
+
+You can have as many variables as you want. They work in the same places as `{{VALUE}}` does.
+
 #### Add from Template 1
 Below is an example object representing one choice in the array.
 ```js
