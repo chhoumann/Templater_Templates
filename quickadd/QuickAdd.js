@@ -1,12 +1,15 @@
 module.exports = start;
 let tp;
+let variables = {}; // Format: {"variableName": "value"}. Used with {{VALUE:variable}}.
+
 const defaultFolder = "/";
 const defaultStartSymbol = "";
 
-const FILE_NUMBER_REGEX = new RegExp(/([0-9]*).md$/);
+const FILE_NUMBER_REGEX = new RegExp(/([0-9]*)\.md$/);
 
 const DATE_REGEX = new RegExp(/{{DATE}}|{{DATE:([^}\n\r]*)}}/);
 const NAME_VALUE_REGEX = new RegExp(/{{NAME}}|{{VALUE}}/);
+const VARIABLE_REGEX = new RegExp(/{{VALUE:([^\n\r}]*)}}/);
 const LINK_TO_CURRENT_FILE_REGEX = new RegExp(/{{LINKCURRENT}}/);
 
 const MARKDOWN_FILE_EXTENSION_REGEX = new RegExp(/\.md$/);
@@ -18,15 +21,21 @@ const error = (msg) => {
     new Notice(errMsg, 5000);
     return new Error(errMsg);
 };
+
 const warn = (msg) => {
     console.log(`QuickAdd: ${msg}`);
     return null;
 };
 
+const clearGlobalVariables = () => { variables = {}; };
+
 async function start(templater, choices) {
     if (!templater) throw error("templater not provided.");
     else tp = templater;
     if (!choices) throw error("no choices provided.");
+
+    // Necessary. Clear variable store.
+    clearGlobalVariables();
 
     const choice = await getChoice(choices);
     if (!choice) return;
@@ -51,21 +60,21 @@ async function doQuickCapture(choice) {
     let filePath = endsWithMd(choice.captureTo) ?
         choice.captureTo : `${choice.captureTo}.md`;
 
-    let input = await promptForValue(choice);
-    if (!input) return warn("no input given.");
+    let input = checkIfNeedValueInput(choice) ? await promptForChoiceValue(choice) : "";
+    if (typeof input !== "string") return warn("no input given.");
 
-    filePath = getFormattedValue(filePath, input);
+    filePath = await getFormattedValue(filePath, input);
 
     if (choice.task)
         input = `- [ ] ${input}`;
 
     if (choice.format && typeof choice.format === "string")
-        input = getFormattedValue(choice.format, input);
+        input = await getFormattedValue(choice.format, input);
 
     if (await app.vault.adapter.exists(filePath)) {
         const file = await getFileByPath(filePath);
 
-        fileContent = await quickCaptureFileContentFormatter(choice, input, file);
+        const fileContent = await quickCaptureFileContentFormatter(choice, input, file);
 
         await app.vault.modify(file, fileContent);
     } else {
@@ -75,6 +84,13 @@ async function doQuickCapture(choice) {
 
     if (choice.appendLink)
         appendToCurrentLine(`[[${filePath}]]`);
+}
+
+function checkIfNeedValueInput(choice) {
+    if (choice.path && NAME_VALUE_REGEX.test(choice.path)) return true;
+    if (choice.format && NAME_VALUE_REGEX.test(choice.format)) return true;
+
+    return false;
 }
 
 async function quickCaptureFileContentFormatter(choice, input, file) {
@@ -112,7 +128,7 @@ async function getFrontmatterEndPosition(file) {
     if (!fileCache || !fileCache.frontmatter) {
         warn("could not get frontmatter. Maybe there isn't any.")
         return 0;
-    };
+    }
 
     if (fileCache.frontmatter.position)
         return fileCache.frontmatter.position.end.line;
@@ -120,12 +136,16 @@ async function getFrontmatterEndPosition(file) {
     return 0;
 }
 
-async function promptForValue(choice) {
+async function promptForChoiceValue(choice) {
+    return await promptForValue(choice.option); 
+}
+
+async function promptForValue(header) {
     const selection = tp.file.selection();
     let value;
 
     if (selection == null || selection.match(/^ *$/) !== null) {
-        value = await tp.system.prompt(choice.option);
+        value = await tp.system.prompt(header);
     } else {
         value = selection;
     }
@@ -135,7 +155,7 @@ async function promptForValue(choice) {
 
 async function addNewFileFromTemplate(choice) {
     const needName = (!choice.format || (choice.format && NAME_VALUE_REGEX.test(choice.format)))
-    const name = needName ? await promptForValue(choice) : "";
+    const name = needName ? await promptForChoiceValue(choice) : "";
     if (needName && !name) return warn("no filename provided.");
 
     const templateContent = await getTemplateData(choice.path);
@@ -145,13 +165,15 @@ async function addNewFileFromTemplate(choice) {
     if (!folder) throw error("could not get or create folder.");
 
     let fileName = choice.format ?
-        getFormattedFileName(choice.format, name, folder) :
+        await getFormattedFileName(choice.format, name, folder) :
         getFileName(choice, folder, name);
 
     if (choice.incrementFileName)
         fileName = await incrementFileName(fileName);
 
-    const formattedTemplateContent = getFormattedValue(templateContent, templateContent);
+    const value = (checkIfNeedValueInput(choice) || NAME_VALUE_REGEX.test(templateContent))
+        ? await promptForChoiceValue(choice) : "";
+    const formattedTemplateContent = await getFormattedValue(templateContent, value);
 
     const created = await createFileWithInput(fileName, formattedTemplateContent);
     if (!created) return error("could not create file.");
@@ -255,22 +277,23 @@ function getFileName(choice, folder, name) {
     return `${folder}/${modStartSymbol}${name}.md`;
 }
 
-function getFormattedFileName(format, name, folder) {
-    return `${folder}/${getFormattedValue(format, name)}.md`;
+async function getFormattedFileName(format, name, folder) {
+    return `${folder}/${await getFormattedValue(format, name)}.md`;
 }
 
-function getFormattedValue(format, value) {
+async function getFormattedValue(format, input) {
     let output = format;
 
-    output = replaceDateInFileName(output);
-    output = replaceValueInFileName(output, value);
-    output = replaceLinkToCurrentFileInFileName(output);
+    output = replaceDateInString(output);
+    output = replaceValueInString(output, input);
+    output = await replaceVariableInString(output, input);
+    output = replaceLinkToCurrentFileInString(output);
 
     return output;
 }
 
-function replaceDateInFileName(fileName) {
-    let output = fileName;
+function replaceDateInString(input) {
+    let output = input;
 
     while (DATE_REGEX.test(output)) {
         const dateMatch = DATE_REGEX.exec(output);
@@ -283,18 +306,49 @@ function replaceDateInFileName(fileName) {
     return output;
 }
 
-function replaceValueInFileName(fileName, value) {
-    let output = fileName;
+function replaceValueInString(input, value) {
+    let output = input;
 
-    while (NAME_VALUE_REGEX.test(output))
+    while (NAME_VALUE_REGEX.test(output)) {
         output = output.replace(NAME_VALUE_REGEX, value);
+    }
 
     return output;
 }
 
-function replaceLinkToCurrentFileInFileName(fileName) {
+async function suggestForValue(suggestValues) {
+    return await tp.system.suggester(suggestValues.map(s => s.trim()), suggestValues);
+}
+
+async function replaceVariableInString(input) {
+    let output = input;
+
+    while (VARIABLE_REGEX.test(output)) {
+        const match = VARIABLE_REGEX.exec(output);
+        const variableName = match[1];
+
+        if (variableName) {
+            if (!variables[variableName]) {
+                const split = variableName.split(",");
+
+                if (split.length === 1)
+                    variables[variableName] = await promptForValue(variableName);
+                else
+                    variables[variableName] = await suggestForValue(split);
+            }
+
+            output = output.replace(VARIABLE_REGEX, variables[variableName]);
+        } else {
+            break;
+        }
+    }
+
+    return output;
+}
+
+function replaceLinkToCurrentFileInString(input) {
     const currentFilePath = `[[${tp.file.path(true)}]]`;
-    let output = fileName;
+    let output = input;
 
     while (LINK_TO_CURRENT_FILE_REGEX.test(output))
         output = output.replace(LINK_TO_CURRENT_FILE_REGEX, currentFilePath);
