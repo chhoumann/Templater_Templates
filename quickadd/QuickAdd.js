@@ -10,10 +10,13 @@ const FILE_NUMBER_REGEX = new RegExp(/([0-9]*)\.md$/);
 const DATE_REGEX = new RegExp(/{{DATE}}|{{DATE:([^}\n\r]*)}}/);
 const NAME_VALUE_REGEX = new RegExp(/{{NAME}}|{{VALUE}}/);
 const VARIABLE_REGEX = new RegExp(/{{VALUE:([^\n\r}]*)}}/);
+const DATE_VARIABLE_REGEX = new RegExp(/{{VDATE:([^\n\r},]*),\s*([^\n\r},]*)}}/);
 const LINK_TO_CURRENT_FILE_REGEX = new RegExp(/{{LINKCURRENT}}/);
 
 const MARKDOWN_FILE_EXTENSION_REGEX = new RegExp(/\.md$/);
 const endsWithMd = (str) => MARKDOWN_FILE_EXTENSION_REGEX.test(str);
+
+const NLDATES = app.plugins.plugins["nldates-obsidian"];
 
 const error = (msg) => {
     errMsg = `QuickAdd: ${msg}`;
@@ -286,8 +289,14 @@ async function getFormattedValue(format, input) {
 
     output = replaceDateInString(output);
     output = replaceValueInString(output, input);
-    output = await replaceVariableInString(output, input);
+    output = await replaceVariableInString(output);
     output = replaceLinkToCurrentFileInString(output);
+
+    if (NLDATES) 
+        output = await replaceDateVariableInString(output);
+    else if (DATE_VARIABLE_REGEX.test(output))
+        throw error("you cannot use date variables without the Natural Language Dates plugin installed.")
+    
 
     return output;
 }
@@ -338,6 +347,35 @@ async function replaceVariableInString(input) {
             }
 
             output = output.replace(VARIABLE_REGEX, variables[variableName]);
+        } else {
+            break;
+        }
+    }
+
+    return output;
+}
+
+async function replaceDateVariableInString(input) {
+    let output = input;
+
+    while (DATE_VARIABLE_REGEX.test(output)) {
+        const match = DATE_VARIABLE_REGEX.exec(output);
+        const variableName = match[1];
+        const dateFormat = match[2];
+
+        if (variableName && dateFormat) {
+            if (!variables[variableName]) {
+                variables[variableName] = await promptForValue(variableName);
+
+                const parseAttempt = NLDATES.parseDate(variables[variableName]);
+                
+                if (parseAttempt)
+                    variables[variableName] = parseAttempt.moment.format(dateFormat);
+                else 
+                    throw error(`unable to parse date variable ${variables[variableName]}`);
+            }
+
+            output = output.replace(DATE_VARIABLE_REGEX, variables[variableName]);
         } else {
             break;
         }
