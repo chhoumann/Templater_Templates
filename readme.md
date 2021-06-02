@@ -49,16 +49,6 @@ There are two main contexts to be aware of. Adding from a template, and quick ca
 
 
 #### `format` syntax
-| Template                  | Description                                                                                                                                                                                                                   |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `{{DATE}}`                | Outputs the current date in `YYYY-MM-DD` format.                                                                                                                                                                              |
-| `{{DATE:<DATEFORMAT>}}`   | Replace `<DATEFORMAT>` with a [Moment.js date format](https://momentjs.com/docs/#/displaying/format/).                                                                                                                        |
-| `{{VALUE}}` or `{{NAME}}` | Interchangeable. Represents the value given in an input prompt.                                                                                                                                                               |
-| `{{VALUE:<variable name>` | You can now use variable names in values. They'll get saved and inserted just like values, but the difference is that you can have as many of them as you want. Use comma separation to get a suggester rather than a prompt. | 
-| `{{LINKCURRENT}}`         | A link to the file from which the template is activated from. `[[link]]` format.                                                                                                                                              |
-
-|
-#### `format` syntax
 | Template                                   | Description                                                                                                                                                                                                                   |
 | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `{{DATE}}`                                 | Outputs the current date in `YYYY-MM-DD` format.                                                                                                                                                                              |
