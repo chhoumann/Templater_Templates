@@ -25,7 +25,6 @@ const copyButtonMaker = (dvPages) => {
         // This puts them all on new lines. If you want tag separation,
         // you should do `.join(", ")` instead.
         const allFileLinks = [...dvPages.map(formatFileName)].join("\n");
-        console.log(allFileLinks)
         copyToClipboard(allFileLinks);
     });
     
