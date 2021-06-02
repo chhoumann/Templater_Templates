@@ -285,3 +285,9 @@ $$
   \end{gather}
 $$
 ```
+
+### https://github.com/chhoumann/Templater_Templates/blob/master/dataview/copy_links_in_query.md
+This allows you to copy links to files found in a Dataviewjs query. You can customize the format however you want.
+
+DEMO (and my use case):
+![p19qk7DGAX](https://user-images.githubusercontent.com/29108628/120461646-7594d480-c39a-11eb-829b-71865e627300.gif)
